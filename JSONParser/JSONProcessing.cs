@@ -24,9 +24,9 @@ namespace JSONParser
         private static void FillDictionaryFromJToken(Dictionary<string, object> dict, JToken token, string prefix)
         {
             JTokenType type = token.Type;
-            if (!type.Equals("Object"))
+            if (!type.ToString().Equals("Object"))
             {
-                if (type.GetTypeCode().Equals("DBNull"))
+                if (type.ToString().Equals("DBNull"))
                 {
                     int num = 0;
                     JEnumerable<JToken> jenumerable = token.Children();
