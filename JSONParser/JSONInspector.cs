@@ -87,9 +87,10 @@ namespace JSONParser
                             stringBuilder.Append(current.Key + KeyDelimiter);
                         }
                     }
-                    stringBuilder.Length -= 4;
+                    //stringBuilder.Length -= 4;
                 }
                 ReturnStatusCode = 0;
+                KeyList = stringBuilder.ToString();
                 return stringBuilder.ToString();
             }
             catch (Exception e)
@@ -100,6 +101,37 @@ namespace JSONParser
             }
             
         }
+
+        public string IsolateKey(string jKey)
+        {
+            try
+            {
+                List<string> keyList = KeyList.Split('~').ToList();
+                if (keyList.Count >= 1)
+                {
+                    foreach (var key in keyList)
+                    {
+                        if (Contains(key, jKey, StringComparer.InvariantCultureIgnoreCase))
+                        {
+                            jKey = key;
+                        }
+                    }
+                }
+                else
+                {
+                    jKey = keyList[0];
+                }
+                ReturnStatusCode = 0;
+                return jKey.Trim();
+            }
+            catch (Exception e)
+            {
+                ReturnStatusCode = -1;
+                ReturnStatusDescription = $"{ErrorIntro}Message:  {e.Message}{Environment.NewLine}Source:  {e.Source}{Environment.NewLine}StackTrace:  {e.StackTrace}{Environment.NewLine}Inner Exception:  {e.InnerException}{Environment.NewLine}";
+                return null;
+            }
+        }
+
 
         public bool IsValidJson(string jsonString)
         {

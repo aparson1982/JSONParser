@@ -20,12 +20,16 @@ namespace JSONParser
 
         public string ReturnStatusDescription { get => returnStatusDescription; set => returnStatusDescription = value; }
         public int ReturnStatusCode { get => returnStatusCode; set => returnStatusCode = value; }
+        public string ResolvedEntryJson { get => resolvedEntryJson; set => resolvedEntryJson = value; }
+        public string KeyList { get => keyList; set => keyList = value; }
 
         private const string invalidJsonStringErrorMessage = "The given JSON String is invalid.";
         private const string invalidKeyErrorMessage = "The JSON does not contain the provided key.";
         private const string jsonObjectNotSetErrorMessage = "Call ParseJSONString function with valid Json String as an argument before using this function.";
-        private const string keyDelimiter = "@AA@";
+        private const string keyDelimiter = "~";
         private string returnStatusDescription;
         private int returnStatusCode;
+        private string resolvedEntryJson;
+        private string keyList;
     }
 }

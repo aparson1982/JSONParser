@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web.Script.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -21,12 +22,59 @@ namespace JSONParser
             return dict;
         }
 
+        private static Dictionary<string, object> DeserializeJson(string json)
+        {
+            JavaScriptSerializer serializer = new JavaScriptSerializer();
+            Dictionary<string, object> dictionary = serializer.Deserialize<Dictionary<string, object>>(json);
+            return dictionary;
+        }
+
+        private void Resolve(Dictionary<string,object> dic, string SupKey)
+        {
+            foreach (KeyValuePair<string, object> entry in dic)
+            {
+                if (entry.Value is Dictionary<string,object>)
+                {
+                    Resolve((Dictionary<string, object>)entry.Value, entry.Key);
+                }
+                else
+                {
+                    if (entry.Value is ICollection)
+                    {
+                        foreach (object item in (ICollection)entry.Value)
+                        {
+                            if (item is Dictionary<string,object>)
+                            {
+                                Resolve((Dictionary<string, object>)item, SupKey + " : " + entry.Key);
+                            }
+                            else
+                            {
+                                ResolvedEntryJson += item.ToString();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        ResolvedEntryJson += SupKey + " : " + entry.Key.ToString() + "--->" + entry.Value.ToString();
+                    }
+                }
+            }
+        }
+
+        public string ResolveEntry(string JsonString, string key)
+        {
+            Dictionary<string, object> dic = DeserializeJson(JsonString);
+            Resolve(dic, key);
+            return ResolvedEntryJson;
+        }
+
         private static void FillDictionaryFromJToken(Dictionary<string, object> dict, JToken token, string prefix)
         {
             JTokenType type = token.Type;
-            if (!type.ToString().Equals("Object"))
+            int tokenType = (int)type;
+            if (tokenType != 1)
             {
-                if (type.ToString().Equals("DBNull"))
+                if (tokenType == 2)
                 {
                     int num = 0;
                     JEnumerable<JToken> jenumerable = token.Children();
