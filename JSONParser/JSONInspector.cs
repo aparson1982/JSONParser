@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using CustomExtensions;
 
 namespace JSONParser
 {
@@ -13,23 +14,33 @@ namespace JSONParser
     {
         private JObject jObject;
         private string keyBase;
+        private Stack<string> keyStack = new Stack<string>();
+        private Stack<string> valueStack = new Stack<string>();
 
         public string ParseJSONString(string jsonString)
         {
             string str = string.Empty;
             try
             {
-                if (jsonString.StartsWith("[") && jsonString.EndsWith("]"))
+                if (IsValidJson(jsonString))
                 {
-                    string jStr = "{'data' : " + jsonString + "}";
-                    keyBase = "data";
-                    jObject = JObject.Parse(jStr);
+                    if (jsonString.StartsWith("[") && jsonString.EndsWith("]"))
+                    {
+                        string jStr = "{'data' : " + jsonString + "}";
+                        keyBase = "data";
+                        jObject = JObject.Parse(jStr);
+                    }
+                    else
+                    {
+                        keyBase = null;
+                        jObject = JObject.Parse(jsonString);
+                    }
                 }
                 else
                 {
-                    keyBase = null;
-                    jObject = JObject.Parse(jsonString);
+                    throw new Exception(InvalidJsonStringErrorMessage);
                 }
+                
             }
             catch (JsonReaderException e)
             {
@@ -111,7 +122,7 @@ namespace JSONParser
                 {
                     foreach (var key in keyList)
                     {
-                        if (Contains(key, jKey, StringComparer.InvariantCultureIgnoreCase))
+                        if (key.Contains(jKey, StringComparison.InvariantCultureIgnoreCase))
                         {
                             jKey = key;
                         }
@@ -130,6 +141,57 @@ namespace JSONParser
                 ReturnStatusDescription = $"{ErrorIntro}Message:  {e.Message}{Environment.NewLine}Source:  {e.Source}{Environment.NewLine}StackTrace:  {e.StackTrace}{Environment.NewLine}Inner Exception:  {e.InnerException}{Environment.NewLine}";
                 return null;
             }
+        }
+
+        public string FindValueFromKey(string JsonString, string jKey, string KeyPath = null, string Delimiter = null)
+        {
+            
+            try
+            {
+                ParseJSONString(JsonString);
+
+                List<string> keyList = GetKeys().Split('~').ToList();
+                List<string> valueList = new List<string>();
+                foreach(string key in keyList)
+                {
+                    if (key.Contains(jKey, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        ReturnStatusCode = 0;
+                        return GetValue(jKey);
+                    }
+                    if (!string.IsNullOrEmpty(key) && !string.IsNullOrWhiteSpace(key))
+                    {
+                        keyStack.Push(key);
+                    }
+                    
+                }
+
+                foreach (string key in keyStack)
+                {
+                    string jString = GetValue(key).Replace("\r\n", string.Empty);
+                    if(!jString.Contains(jKey, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        keyStack.Pop();
+                    }
+                    else
+                    {
+                        keyStack.Pop();
+                        FindValueFromKey(jString, jKey);
+                        
+                    }
+                    
+                }
+
+                throw new Exception(InvalidKeyErrorMessage);
+
+            }
+            catch (Exception e)
+            {
+                ReturnStatusCode = -1;
+                ReturnStatusDescription = $"{ErrorIntro}Message:  {e.Message}{Environment.NewLine}Source:  {e.Source}{Environment.NewLine}StackTrace:  {e.StackTrace}{Environment.NewLine}Inner Exception:  {e.InnerException}{Environment.NewLine}";
+                return null;
+            }
+            
         }
 
 

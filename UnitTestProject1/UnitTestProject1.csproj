@@ -56,6 +56,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CustomExtensions\CustomExtensions.csproj">
+      <Project>{00351797-cfdc-482c-af91-2ce2d8241384}</Project>
+      <Name>CustomExtensions</Name>
+    </ProjectReference>
     <ProjectReference Include="..\JSONParser\JSONParser.csproj">
       <Project>{2f902cf2-f6cf-4bb3-baf1-8c295edbe61f}</Project>
       <Name>JSONParser</Name>
