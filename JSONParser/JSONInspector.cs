@@ -15,7 +15,7 @@ namespace JSONParser
         private JObject jObject;
         private string keyBase;
         private Stack<string> keyStack = new Stack<string>();
-        private Stack<string> valueStack = new Stack<string>();
+        private Dictionary<string, string> keyValueDictionary = new Dictionary<string, string>();
 
         public string ParseJSONString(string jsonString)
         {
@@ -143,44 +143,85 @@ namespace JSONParser
             }
         }
 
-        public string FindValueFromKey(string JsonString, string jKey, string KeyPath = null, string Delimiter = null)
+        public string FindValueFromKey(string JsonString, string jKey, string KeyPath = null, string Delimiter = null, bool deserializeAndFlatten = false)
         {
-            
             try
             {
-                ParseJSONString(JsonString);
-
-                List<string> keyList = GetKeys().Split('~').ToList();
-                List<string> valueList = new List<string>();
-                foreach(string key in keyList)
+                if (!deserializeAndFlatten)
                 {
-                    if (key.Contains(jKey, StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        ReturnStatusCode = 0;
-                        return GetValue(jKey);
-                    }
-                    if (!string.IsNullOrEmpty(key) && !string.IsNullOrWhiteSpace(key))
-                    {
-                        keyStack.Push(key);
-                    }
-                    
-                }
 
-                foreach (string key in keyStack)
-                {
-                    string jString = GetValue(key).Replace("\r\n", string.Empty);
-                    if(!jString.Contains(jKey, StringComparison.InvariantCultureIgnoreCase))
+                    if ((!string.IsNullOrEmpty(KeyPath) || !string.IsNullOrWhiteSpace(KeyPath)) && (!string.IsNullOrEmpty(Delimiter) || !string.IsNullOrWhiteSpace(Delimiter)))
                     {
-                        keyStack.Pop();
+                        char delimiter = Delimiter.ToCharArray()[0];
+                        List<string> keyPath = KeyPath.Split(delimiter).ToList();
+                        string jString = JsonString;
+                        int keyCounter = 1;
+                        for (int i = 0; i < keyPath.Count; i++)
+                        {
+                            ParseJSONString(jString);
+                            jString = GetValue(keyPath[i]);
+                            if (keyCounter == keyPath.Count)
+                            {
+                                return jString;
+                            }
+                            keyCounter++;
+                        }
                     }
                     else
                     {
-                        keyStack.Pop();
-                        FindValueFromKey(jString, jKey);
-                        
-                    }
+
+                        ParseJSONString(JsonString);
+                        List<string> keyList = GetKeys().Split('~').ToList();
+                
+                        foreach(string key in keyList)
+                        {
+                            if (key.Equals(jKey, StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                ReturnStatusCode = 0;
+                                return GetValue(jKey);
+                            }
+                            if (!string.IsNullOrEmpty(key) && !string.IsNullOrWhiteSpace(key) && GetValue(key).Contains(jKey, StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                keyStack.Push(key);
+                            }
                     
+                        }
+                
+                        foreach (string key in keyStack)
+                        {
+                            string jString = GetValue(key).Replace("\r\n", string.Empty);
+                            if(!jString.Contains(jKey, StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                keyStack.Pop();
+                            }
+                            else
+                            {
+                                keyStack.Pop();
+                                return FindValueFromKey(jString, jKey);
+                            }
+                    
+                        }
+                    }
                 }
+                else
+                {
+                    JSONProcessing jsonProcessing = new JSONProcessing();
+                    char delimiter = Delimiter.ToCharArray()[0];
+                    string[] jString = jsonProcessing.ResolveEntry(JsonString, jKey, Delimiter).Split(new[] { delimiter }, StringSplitOptions.RemoveEmptyEntries);
+
+                    //Dictionary<string, string> flatDic = jString.Select(item => item.Split('~')).ToDictionary(s => s[0], s => s[1]);
+                    Dictionary<string, string> flatDic = jString.Aggregate(new Dictionary<string, string>(), (d, v) => { d[v.Split('~')[0]] = v.Split('~')[1]; return d; });
+
+                    foreach(KeyValuePair<string, string> item in flatDic)
+                    {
+                        if (item.Key.Contains(jKey, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            return item.Value;
+                        }
+                    }
+
+                }
+
 
                 throw new Exception(InvalidKeyErrorMessage);
 

@@ -29,13 +29,14 @@ namespace JSONParser
             return dictionary;
         }
 
-        private void Resolve(Dictionary<string,object> dic, string SupKey)
+        private void Resolve(Dictionary<string,object> dic, string SupKey, string Delimiter)
         {
+            char delimiter = Delimiter.ToCharArray()[0];
             foreach (KeyValuePair<string, object> entry in dic)
             {
                 if (entry.Value is Dictionary<string,object>)
                 {
-                    Resolve((Dictionary<string, object>)entry.Value, entry.Key);
+                    Resolve((Dictionary<string, object>)entry.Value, entry.Key, Delimiter);
                 }
                 else
                 {
@@ -45,7 +46,7 @@ namespace JSONParser
                         {
                             if (item is Dictionary<string,object>)
                             {
-                                Resolve((Dictionary<string, object>)item, SupKey + " : " + entry.Key);
+                                Resolve((Dictionary<string, object>)item, SupKey + " : " + entry.Key, Delimiter);
                             }
                             else
                             {
@@ -55,18 +56,19 @@ namespace JSONParser
                     }
                     else
                     {
-                        ResolvedEntryJson += SupKey + " : " + entry.Key.ToString() + "--->" + entry.Value.ToString();
+                        ResolvedEntryJson += SupKey + " : " + entry.Key.ToString() + "~" + entry.Value.ToString() + delimiter;
                     }
                 }
             }
         }
 
-        public string ResolveEntry(string JsonString, string key)
+        public string ResolveEntry(string JsonString, string key, string Delimiter)
         {
             Dictionary<string, object> dic = DeserializeJson(JsonString);
-            Resolve(dic, key);
+            Resolve(dic, key, Delimiter);
             return ResolvedEntryJson;
         }
+
 
         private static void FillDictionaryFromJToken(Dictionary<string, object> dict, JToken token, string prefix)
         {
