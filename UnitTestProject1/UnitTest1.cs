@@ -20,27 +20,35 @@ namespace UnitTestProject1
         [TestMethod]
         public void TestMethod1()
         {
+            //Console.WriteLine(jSONInspector.FindValueFromKey(initialJSONstring, "para"));
+            jSONInspector.ParseJSONString(thirdJson);
+            // Console.WriteLine(jSONInspector.GetKeys() + Environment.NewLine);
+            //jSONInspector.GetKeys();
+            //string key1 = jSONInspector.IsolateKey("web-app");
+            string value1 = jSONInspector.GetValue("web-app");
+            //Console.WriteLine(value2 + Environment.NewLine);
 
-            //Console.WriteLine("Valid JSON?:  " + jSONInspector.IsValidJson(initialJSONstring));
-            jSONInspector.ParseJSONString(initialJSONstring);
-            string key1 = jSONInspector.GetKeys();
-            Console.WriteLine("Key1:  " + key1 + Environment.NewLine);
-            key1 = jSONInspector.IsolateKey("Glossary");
-            string value1 = jSONInspector.GetValue(key1);
-            Console.WriteLine("Value1:  " + value1 + Environment.NewLine);
-            
-            //Console.WriteLine(jSONInspector.IsValidJson(value1));
+
+
             jSONInspector.ParseJSONString(value1);
-            string key2 = jSONInspector.GetKeys();
-            key2 = jSONInspector.IsolateKey("GlossDiv");
-            string value2 = jSONInspector.GetValue(key2);
-            Console.WriteLine("Value2:  " + value2);
+            //jSONInspector.GetKeys();
+            //string key2 = jSONInspector.IsolateKey("servlet");
+            string value2 = jSONInspector.GetValue("servlet[0]");
+            //Console.WriteLine(value2);
+            //Console.WriteLine(value2);
+
 
             jSONInspector.ParseJSONString(value2);
-            string key3 = jSONInspector.GetKeys();
-            key3 = jSONInspector.IsolateKey("GlossList");
-            string value3 = jSONInspector.GetValue(key3);
-            Console.WriteLine("Value2:  " + value3);
+            //Console.WriteLine(jSONInspector.GetKeys());
+            //string key3 = jSONInspector.IsolateKey("init-param");
+            string value3 = jSONInspector.GetValue("init-param");
+            //Console.WriteLine(value3);
+
+            jSONInspector.ParseJSONString(value3);
+            //jSONInspector.GetKeys();
+            // string key4 = jSONInspector.IsolateKey("dataStoreUrl");
+            string value4 = jSONInspector.GetValue("dataStoreUrl");
+            Console.WriteLine(value4);
 
 
         }
@@ -66,8 +74,10 @@ namespace UnitTestProject1
         [TestMethod]
         public void GetValueFromKeyTest()
         {
-            //Console.WriteLine(jSONInspector.FindValueFromKey(initialJSONstring, "para"));
-            Console.WriteLine(jSONInspector.FindValueFromKey(initialJSONstring, "glossary", "","|",true));
+            
+            //Console.WriteLine(value3);
+            //Console.WriteLine(jSONInspector.FindValueFromKey(thirdJson, "web-app|servlet[0]|init-param|dataStoreName", "|", true));
+            Console.WriteLine(jSONInspector.FindValueFromKey(thirdJson, "servlet-name", "",false));
             //Console.WriteLine(jSONInspector.ReturnStatusCode);
             //Console.WriteLine(jSONInspector.ReturnStatusDescription);
         }

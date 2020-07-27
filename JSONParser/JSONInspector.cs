@@ -26,8 +26,8 @@ namespace JSONParser
                 {
                     if (jsonString.StartsWith("[") && jsonString.EndsWith("]"))
                     {
-                        string jStr = "{'data' : " + jsonString + "}";
-                        keyBase = "data";
+                        string jStr = "{'array' : " + jsonString + "}";
+                        keyBase = "array";
                         jObject = JObject.Parse(jStr);
                     }
                     else
@@ -86,7 +86,7 @@ namespace JSONParser
             {
                 if (!string.IsNullOrEmpty(this.keyBase))
                 {
-                    stringBuilder.Append("data");
+                    stringBuilder.Append("array");
                 }
                 else
                 {
@@ -122,7 +122,7 @@ namespace JSONParser
                 {
                     foreach (var key in keyList)
                     {
-                        if (key.Contains(jKey, StringComparison.InvariantCultureIgnoreCase))
+                        if (key.Equals(jKey, StringComparison.InvariantCultureIgnoreCase))
                         {
                             jKey = key;
                         }
@@ -143,17 +143,19 @@ namespace JSONParser
             }
         }
 
-        public string FindValueFromKey(string JsonString, string jKey, string KeyPath = null, string Delimiter = null, bool deserializeAndFlatten = false)
+        public string FindValueFromKey(string JsonString, string jKey, string Delimiter = null, bool deserializeAndFlatten = false)
         {
             try
             {
-                if (!deserializeAndFlatten)
+                List<string> keyPath = new List<string>();
+                if (!string.IsNullOrEmpty(Delimiter) || !string.IsNullOrWhiteSpace(Delimiter))
                 {
+                    char delimiter = Delimiter.ToCharArray()[0];
+                    keyPath = jKey.Split(delimiter, (char)StringSplitOptions.RemoveEmptyEntries).ToList();
 
-                    if ((!string.IsNullOrEmpty(KeyPath) || !string.IsNullOrWhiteSpace(KeyPath)) && (!string.IsNullOrEmpty(Delimiter) || !string.IsNullOrWhiteSpace(Delimiter)))
+                    if ((keyPath.Count > 1) && (!string.IsNullOrEmpty(Delimiter) || !string.IsNullOrWhiteSpace(Delimiter)))
                     {
-                        char delimiter = Delimiter.ToCharArray()[0];
-                        List<string> keyPath = KeyPath.Split(delimiter).ToList();
+
                         string jString = JsonString;
                         int keyCounter = 1;
                         for (int i = 0; i < keyPath.Count; i++)
@@ -167,41 +169,67 @@ namespace JSONParser
                             keyCounter++;
                         }
                     }
-                    else
-                    {
 
-                        ParseJSONString(JsonString);
-                        List<string> keyList = GetKeys().Split('~').ToList();
+                }
+                if (!deserializeAndFlatten)
+                {
+
+                    ParseJSONString(JsonString);
+                    List<string> keyList = GetKeys().Split('~').ToList();
                 
-                        foreach(string key in keyList)
+                    foreach(string key in keyList)
+                    {
+                        string arrayKey;
+                        if (key.Equals(jKey, StringComparison.InvariantCultureIgnoreCase))
                         {
-                            if (key.Equals(jKey, StringComparison.InvariantCultureIgnoreCase))
-                            {
-                                ReturnStatusCode = 0;
-                                return GetValue(jKey);
-                            }
-                            if (!string.IsNullOrEmpty(key) && !string.IsNullOrWhiteSpace(key) && GetValue(key).Contains(jKey, StringComparison.InvariantCultureIgnoreCase))
-                            {
-                                keyStack.Push(key);
-                            }
-                    
+                            ReturnStatusCode = 0;
+                            return GetValue(jKey);
                         }
-                
-                        foreach (string key in keyStack)
+                        if (!string.IsNullOrEmpty(key) && !string.IsNullOrWhiteSpace(key))
                         {
-                            string jString = GetValue(key).Replace("\r\n", string.Empty);
-                            if(!jString.Contains(jKey, StringComparison.InvariantCultureIgnoreCase))
+                            string valueHolder = GetValue(key).Replace("\r\n", string.Empty);
+                            if (valueHolder.StartsWith("[") && valueHolder.EndsWith("]"))
                             {
-                                keyStack.Pop();
+                                int count = 0;
+                                while (!string.IsNullOrEmpty(valueHolder) || !string.IsNullOrWhiteSpace(valueHolder))
+                                {
+                                    arrayKey = key + "[" + count + "]";
+                                    valueHolder = GetValue(arrayKey)?.Replace("\r\n", string.Empty);
+
+                                    if (valueHolder.Contains(jKey, StringComparison.InvariantCultureIgnoreCase))
+                                    {
+                                        keyStack.Push(arrayKey);
+                                    }
+                                    count++;
+                                }
                             }
                             else
                             {
-                                keyStack.Pop();
-                                return FindValueFromKey(jString, jKey);
+                                if (valueHolder.Contains(jKey, StringComparison.InvariantCultureIgnoreCase))
+                                {
+                                    keyStack.Push(key);
+                                }
                             }
-                    
                         }
+
                     }
+                
+                    foreach (string key in keyStack)
+                    {
+                        string jString = GetValue(key).Replace("\r\n", string.Empty);
+                        
+                        if(!jString.Contains(jKey, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            keyStack.Pop();
+                        }
+                        else
+                        {
+                            keyStack.Pop();
+                            return FindValueFromKey(jString, jKey);
+                        }
+                    
+                    }
+                    
                 }
                 else
                 {
