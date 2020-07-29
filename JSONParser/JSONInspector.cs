@@ -14,8 +14,32 @@ namespace JSONParser
     {
         private JObject jObject;
         private string keyBase;
+        
         private Stack<string> keyStack = new Stack<string>();
         private Dictionary<string, string> keyValueDictionary = new Dictionary<string, string>();
+
+        public string jArrayParser(string jsonString)
+        {
+            string str = string.Empty;
+            JArray a = JArray.Parse(jsonString);
+
+            
+            foreach (JObject o in a.Children<JObject>())
+            {
+                string[] jArray = new string[o.Count];
+                int i = 0;
+                foreach (JProperty p in o.Properties())
+                {
+                    string name = p.Name;
+                    string value = (string)p.Value;
+                    jArray[i++] = name + ":" + value;
+                    
+                }
+
+                str += string.Join("~", jArray);
+            }
+            return str;
+        }
 
         public string ParseJSONString(string jsonString)
         {
@@ -145,9 +169,15 @@ namespace JSONParser
 
         public string FindValueFromKey(string JsonString, string jKey, string Delimiter = null, bool deserializeAndFlatten = false)
         {
+            
             try
             {
-                List<string> keyPath = new List<string>();
+                //bool combineValues = false;
+                //if (string.IsNullOrEmpty(Delimiter) || string.IsNullOrWhiteSpace(Delimiter))
+                //{
+                //    combineValues = true;
+                //}
+                    List<string> keyPath = new List<string>();
                 if (!string.IsNullOrEmpty(Delimiter) || !string.IsNullOrWhiteSpace(Delimiter))
                 {
                     char delimiter = Delimiter.ToCharArray()[0];
@@ -176,6 +206,7 @@ namespace JSONParser
 
                     ParseJSONString(JsonString);
                     List<string> keyList = GetKeys().Split('~').ToList();
+
                 
                     foreach(string key in keyList)
                     {
@@ -183,6 +214,7 @@ namespace JSONParser
                         if (key.Equals(jKey, StringComparison.InvariantCultureIgnoreCase))
                         {
                             ReturnStatusCode = 0;
+                            //returnValueBuilder += GetValue(jKey) + "~";
                             return GetValue(jKey);
                         }
                         if (!string.IsNullOrEmpty(key) && !string.IsNullOrWhiteSpace(key))
@@ -226,8 +258,8 @@ namespace JSONParser
                         {
                             keyStack.Pop();
                             return FindValueFromKey(jString, jKey);
+                             //FindValueFromKey(jString, jKey);
                         }
-                    
                     }
                     
                 }
@@ -237,7 +269,6 @@ namespace JSONParser
                     char delimiter = Delimiter.ToCharArray()[0];
                     string[] jString = jsonProcessing.ResolveEntry(JsonString, jKey, Delimiter).Split(new[] { delimiter }, StringSplitOptions.RemoveEmptyEntries);
 
-                    //Dictionary<string, string> flatDic = jString.Select(item => item.Split('~')).ToDictionary(s => s[0], s => s[1]);
                     Dictionary<string, string> flatDic = jString.Aggregate(new Dictionary<string, string>(), (d, v) => { d[v.Split('~')[0]] = v.Split('~')[1]; return d; });
 
                     foreach(KeyValuePair<string, string> item in flatDic)
@@ -260,7 +291,35 @@ namespace JSONParser
                 ReturnStatusDescription = $"{ErrorIntro}Message:  {e.Message}{Environment.NewLine}Source:  {e.Source}{Environment.NewLine}StackTrace:  {e.StackTrace}{Environment.NewLine}Inner Exception:  {e.InnerException}{Environment.NewLine}";
                 return null;
             }
+
             
+        }
+
+        public string GetSiblings(string jsonString, string key, string value)
+        {
+            string str = string.Empty;
+            try
+            {
+                JObject jObject = JObject.Parse(jsonString);
+                
+                List<JProperty> properties = jObject.DescendantsAndSelf().OfType<JProperty>().Where(jProp => jProp.Name.Equals(key, StringComparison.InvariantCultureIgnoreCase) && (bool)jProp.Value.ToString().Equals(value, StringComparison.InvariantCultureIgnoreCase)).Take(1).Select(jProp => jProp.Parent).SelectMany(jCont => jCont.Children<JProperty>()).ToList();
+                
+                string[] propArray = new string[properties.Count];
+                int index = 0;
+                foreach (JProperty prop in properties)
+                {
+                    //str += prop.Name + ":" + prop.Value;
+                    propArray[index++] = prop.Name + ":" + prop.Value;
+                }
+
+                str = String.Join("~", propArray);
+                
+            }
+            catch (Exception e)
+            {
+               str = $"{ErrorIntro}Message:  {e.Message}{Environment.NewLine}Source:  {e.Source}{Environment.NewLine}StackTrace:  {e.StackTrace}{Environment.NewLine}Inner Exception:  {e.InnerException}{Environment.NewLine}";
+            }
+            return str;
         }
 
 
