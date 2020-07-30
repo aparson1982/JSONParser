@@ -9,7 +9,7 @@ namespace UnitTestProject1
     [TestClass]
     public class UnitTest1
     {
-        JSONInspector jSONInspector = new JSONInspector();
+        JsonParsing jSONInspector = new JsonParsing();
         JSONProcessing jSONProcessing = new JSONProcessing();
         JSONProperties jsonProp = new JSONProperties();
         public string initialJSONstring = "{\"glossary\": {\"title\": \"example glossary\",\"GlossDiv\": {\"title\": \"S\",\"GlossList\": {\"GlossEntry\": {\"ID\": \"SGML\",\"SortAs\": \"SGML\",\"GlossTerm\": \"Standard Generalized Markup Language\",\"Acronym\": \"SGML\",\"Abbrev\": \"ISO 8879:1986\",\"GlossDef\": {\"para\": \"A meta-markup language, used to create markup languages such as DocBook.\",\"GlossSeeAlso\": [\"GML\", \"XML\"]},\"GlossSee\": \"markup\"}}}}}";
@@ -24,7 +24,7 @@ namespace UnitTestProject1
         public void TestMethod1()
         {
             //Console.WriteLine(jSONInspector.FindValueFromKey(initialJSONstring, "para"));
-            jSONInspector.ParseJSONString(thirdJson);
+            jSONInspector.ParseJsonString(thirdJson);
             // Console.WriteLine(jSONInspector.GetKeys() + Environment.NewLine);
             //jSONInspector.GetKeys();
             //string key1 = jSONInspector.IsolateKey("web-app");
@@ -33,7 +33,7 @@ namespace UnitTestProject1
 
 
 
-            jSONInspector.ParseJSONString(value1);
+            jSONInspector.ParseJsonString(value1);
             //jSONInspector.GetKeys();
             //string key2 = jSONInspector.IsolateKey("servlet");
             string value2 = jSONInspector.GetValue("servlet[0]");
@@ -41,13 +41,13 @@ namespace UnitTestProject1
             //Console.WriteLine(value2);
 
 
-            jSONInspector.ParseJSONString(value2);
+            jSONInspector.ParseJsonString(value2);
             //Console.WriteLine(jSONInspector.GetKeys());
             //string key3 = jSONInspector.IsolateKey("init-param");
             string value3 = jSONInspector.GetValue("init-param");
             //Console.WriteLine(value3);
 
-            jSONInspector.ParseJSONString(value3);
+            jSONInspector.ParseJsonString(value3);
             //jSONInspector.GetKeys();
             // string key4 = jSONInspector.IsolateKey("dataStoreUrl");
             string value4 = jSONInspector.GetValue("dataStoreUrl");
@@ -91,7 +91,7 @@ namespace UnitTestProject1
         [TestMethod]
         public void TestSiblings()
         {
-            Console.WriteLine(jSONInspector.GetSiblings(fourthJson, "Name", "SHX_Admin"));
+            Console.WriteLine(JsonGetters.GetSiblings(fourthJson, "Name", "SHX_Admin"));
         }
     }
 }

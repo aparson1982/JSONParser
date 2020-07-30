@@ -2,10 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -56,7 +53,7 @@ namespace JSONParser
                     }
                     else
                     {
-                        ResolvedEntryJson += SupKey + " : " + entry.Key.ToString() + "~" + entry.Value.ToString() + delimiter;
+                        ResolvedEntryJson += SupKey + " : " + entry.Key + "~" + entry.Value + delimiter;
                     }
                 }
             }
@@ -117,7 +114,6 @@ namespace JSONParser
 
         public string[,] JsonToArray(string jsonString)
         {
-            string empty = string.Empty;
             if (string.IsNullOrEmpty(jsonString.Trim()))
             {
                 ReturnStatusCode = -1;
@@ -133,7 +129,7 @@ namespace JSONParser
                 int num3 = 0;
                 foreach (KeyValuePair<string, object> keyValuePair in dictionary)
                 {
-                    int num4 = keyValuePair.Key.LastIndexOf(".");
+                    int num4 = keyValuePair.Key.LastIndexOf(".", StringComparison.Ordinal);
                     string str1 = num4 > -1 ? keyValuePair.Key.Substring(num4 + 1) : keyValuePair.Key;
                     Match match = Regex.Match(keyValuePair.Key, "\\.([1-9]+)\\.");
                     if (match.Success)
@@ -150,7 +146,7 @@ namespace JSONParser
                 {
                     foreach (KeyValuePair<string, object> keyValuePair in dictionary)
                     {
-                        int num4 = keyValuePair.Key.LastIndexOf(".");
+                        int num4 = keyValuePair.Key.LastIndexOf(".", StringComparison.Ordinal);
                         string str = num4 > -1 ? keyValuePair.Key.Substring(num4 + 1) : keyValuePair.Key;
                         if (!Regex.Match(keyValuePair.Key, "\\.([0-9]+)\\.").Success)
                             stringList.Add(keyValuePair.Key);
@@ -164,12 +160,12 @@ namespace JSONParser
                 using (DataTable dataTable = new DataTable())
                 {
                     dataTable.Clear();
-                    DataRow row1 = (DataRow)null;
+                    DataRow row1 = null;
                     int num5 = 0;
                     string str3 = string.Empty;
                     foreach (KeyValuePair<string, object> keyValuePair in dictionary)
                     {
-                        int num4 = keyValuePair.Key.LastIndexOf(".");
+                        int num4 = keyValuePair.Key.LastIndexOf(".", StringComparison.Ordinal);
                         if (num5 == 0)
                         {
                             str3 = keyValuePair.Key.Substring(num4 + 1);
@@ -190,7 +186,7 @@ namespace JSONParser
                     int num6 = 0;
                     foreach (KeyValuePair<string, object> keyValuePair in dictionary)
                     {
-                        int num4 = keyValuePair.Key.LastIndexOf(".");
+                        int num4 = keyValuePair.Key.LastIndexOf(".", StringComparison.Ordinal);
                         string str1 = num4 > -1 ? keyValuePair.Key.Substring(num4 + 1) : keyValuePair.Key;
                         Match match = Regex.Match(keyValuePair.Key, "\\.([0-9]+)\\.");
                         if (match.Success)
@@ -224,7 +220,7 @@ namespace JSONParser
                     {
                         foreach (DataColumn column in dataTable.Columns)
                         {
-                            ReturnStatusDescription = ReturnStatusDescription + row2[column]?.ToString() + "\t|";
+                            ReturnStatusDescription = ReturnStatusDescription + row2[column] + "\t|";
                             strArray[index4, index3] = row2[column].ToString();
                             ++index3;
                         }
@@ -263,7 +259,7 @@ namespace JSONParser
                 Dictionary<string, object> dictionary = DeserializeAndFlatten(jsonString);
                 ReturnStatusDescription = string.Empty;
                 foreach (KeyValuePair<string, object> keyValuePair in dictionary)
-                    ReturnStatusDescription = ReturnStatusDescription + keyValuePair.Key + ": " + keyValuePair.Value?.ToString() + "\n";
+                    ReturnStatusDescription = ReturnStatusDescription + keyValuePair.Key + ": " + keyValuePair.Value + "\n";
                 return 0;
             }
             catch (JsonReaderException e)

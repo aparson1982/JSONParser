@@ -1,26 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace JSONParser
+﻿namespace JSONParser
 {
     public class JSONProperties : ErrorProperties
     {
         
         internal static string KeyDelimiter => keyDelimiter;
         
-        public string ReturnStatusDescription { get => returnStatusDescription; set => returnStatusDescription = value; }
-        public int ReturnStatusCode { get => returnStatusCode; set => returnStatusCode = value; }
-        public string ResolvedEntryJson { get => resolvedEntryJson; set => resolvedEntryJson = value; }
-        public string KeyList { get => keyList; set => keyList = value; }
+        public string ReturnStatusDescription { get; set; }
+
+        public int ReturnStatusCode { get; set; }
+
+        public string ResolvedEntryJson { get; set; }
+
+        public string KeyList { get; set; }
 
         private const string keyDelimiter = "~";
-        private string returnStatusDescription;
-        private int returnStatusCode;
-        private string resolvedEntryJson;
-        private string keyList;
-        
     }
 }

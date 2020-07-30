@@ -46,7 +46,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ErrorProperties.cs" />
-    <Compile Include="JSONInspector.cs" />
+    <Compile Include="JsonGetters.cs" />
+    <Compile Include="JsonParsing.cs" />
     <Compile Include="JSONProcessing.cs" />
     <Compile Include="JSONProperties.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
