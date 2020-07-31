@@ -12,6 +12,7 @@ namespace UnitTestProject1
         JsonParsing jSONInspector = new JsonParsing();
         JSONProcessing jSONProcessing = new JSONProcessing();
         JSONProperties jsonProp = new JSONProperties();
+        JsonGetters jsonGetters = new JsonGetters();
         public string initialJSONstring = "{\"glossary\": {\"title\": \"example glossary\",\"GlossDiv\": {\"title\": \"S\",\"GlossList\": {\"GlossEntry\": {\"ID\": \"SGML\",\"SortAs\": \"SGML\",\"GlossTerm\": \"Standard Generalized Markup Language\",\"Acronym\": \"SGML\",\"Abbrev\": \"ISO 8879:1986\",\"GlossDef\": {\"para\": \"A meta-markup language, used to create markup languages such as DocBook.\",\"GlossSeeAlso\": [\"GML\", \"XML\"]},\"GlossSee\": \"markup\"}}}}}";
         public string substringOfInitialString = "{  \"title\": \"example glossary\",  \"GlossDiv\": {    \"title\": \"S\",    \"GlossList\": {      \"GlossEntry\": {        \"ID\": \"SGML\",        \"SortAs\": \"SGML\",        \"GlossTerm\": \"Standard Generalized Markup Language\",        \"Acronym\": \"SGML\",        \"Abbrev\": \"ISO 8879:1986\",        \"GlossDef\": {          \"para\": \"A meta-markup language, used to create markup languages such as DocBook.\",          \"GlossSeeAlso\": [            \"GML\",            \"XML\"          ]    },        \"GlossSee\": \"markup\"      }    }  }}";
         public string secondJsonString = "{\"menu\": {  \"id\": \"file\",  \"value\": \"File\",  \"popup\": {    \"menuitem\": [      {\"value\": \"New\", \"onclick\": \"CreateNewDoc()\"},      {\"value\": \"Open\", \"onclick\": \"OpenDoc()\"},      {\"value\": \"Close\", \"onclick\": \"CloseDoc()\"}    ]  }}}";
@@ -91,7 +92,7 @@ namespace UnitTestProject1
         [TestMethod]
         public void TestSiblings()
         {
-            Console.WriteLine(JsonGetters.GetSiblings(fourthJson, "Name", "SHX_Admin"));
+            Console.WriteLine(jsonGetters.GetSiblings(fourthJson, "Name", "SHX_Admin"));
         }
     }
 }

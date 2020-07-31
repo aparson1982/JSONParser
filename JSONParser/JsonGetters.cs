@@ -142,7 +142,6 @@ namespace JSONParser
                 int index = 0;
                 foreach (JProperty prop in properties)
                 {
-                    //str += prop.Name + ":" + prop.Value;
                     propArray[index++] = prop.Name + ":" + prop.Value;
                 }
 
