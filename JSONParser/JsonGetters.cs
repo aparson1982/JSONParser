@@ -154,5 +154,92 @@ namespace JSONParser
             }
             return str;
         }
+
+
+        public string GetSiblingsSelectMany(string jsonString, string key, string value, int take)
+        {
+            string str;
+            try
+            {
+                JObject jObject = JObject.Parse(jsonString);
+
+                List<JProperty> properties = jObject.DescendantsAndSelf().OfType<JProperty>()
+                    .Where(jProp => jProp.Name.Equals(key, StringComparison.InvariantCultureIgnoreCase) && (bool)jProp.Value.ToString()
+                    .Equals(value, StringComparison.InvariantCultureIgnoreCase))
+                    .Take(take).Select(jProp => jProp.Parent).SelectMany(jCont => jCont.Children<JProperty>()).ToList();
+
+                string[] propArray = new string[properties.Count];
+                int index = 0;
+                foreach (JProperty prop in properties)
+                {
+                    propArray[index++] = prop.Name + ":" + prop.Value;
+                }
+
+                str = string.Join(",", propArray);
+
+            }
+            catch (Exception e)
+            {
+                str = $"{ErrorIntro}Message:  {e.Message}{Environment.NewLine}Source:  {e.Source}{Environment.NewLine}StackTrace:  {e.StackTrace}{Environment.NewLine}Inner Exception:  {e.InnerException}{Environment.NewLine}";
+            }
+            return str;
+        }
+
+
+        public string QueryJson(string jsonString, string query)
+        {
+            string str = string.Empty;
+            try
+            {
+                JObject jObject = JObject.Parse(jsonString);
+
+                IEnumerable<JToken> obj = jObject.SelectTokens(query);
+
+                string[] propArray = new string[obj.Count()];
+                int index = 0;
+                foreach(JToken item in obj)
+                {
+                    propArray[index++] = item.ToString();
+                }
+
+                str = string.Join("~", propArray);
+               
+
+            }
+            catch (Exception e)
+            {
+                str = $"{ErrorIntro}Message:  {e.Message}{Environment.NewLine}Source:  {e.Source}{Environment.NewLine}StackTrace:  {e.StackTrace}{Environment.NewLine}Inner Exception:  {e.InnerException}{Environment.NewLine}";
+            }
+            return str;
+        }
+
+
+        public string QueryJsonB(string jsonString, string query, string delimiter = "~")
+        {
+            string str = string.Empty;
+            try
+            {
+                JObject jObject = JObject.Parse(jsonString);
+
+                IEnumerable<JToken> obj = jObject.SelectTokens(query);
+
+                string[] propArray = new string[obj.Count()];
+                int index = 0;
+                foreach (JToken item in obj)
+                {
+                    propArray[index++] = item.ToString();
+                }
+
+                str = string.Join(delimiter, propArray);
+
+
+            }
+            catch (Exception e)
+            {
+                str = $"{ErrorIntro}Message:  {e.Message}{Environment.NewLine}Source:  {e.Source}{Environment.NewLine}StackTrace:  {e.StackTrace}{Environment.NewLine}Inner Exception:  {e.InnerException}{Environment.NewLine}";
+            }
+            return str;
+        }
+
     }
 }
